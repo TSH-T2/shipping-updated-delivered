@@ -227,8 +227,36 @@ endcapture %}
                                 </table>
                                 <table class="container">
                                     <tr>
-                                        <td> 
-                                            {% comment %} SB - End {% endcomment %}
+                                        <td>
+                                            {% comment %} SB - Start {% endcomment %}
+                                            {% comment %} Gather all unique bundle groups and their details {%
+                                            endcomment %}
+                                            {% assign bundle_groups = '' %}
+                                            {% for line_item in fulfillment.fulfillment_line_items %}
+                                            {% assign group_id = '' %}
+                                            {% assign group_title = '' %}
+                                            {% assign group_quantity = '' %}
+                                            {% for property in line_item.line_item.properties %}
+                                            {% if property.first == '_sb_bundle_group' %}
+                                            {% assign group_id = property.last | split: ' ' | first %}
+                                            {% endif %}
+                                            {% if property.first == '_sb_bundle_title' %}
+                                            {% assign group_title = property.last | split: '|' | first %}
+                                            {% endif %}
+                                            {% if property.first == '_sb_bundle_variant_id_qty' %}
+                                            {% assign group_quantity = property.last | split: ':' | last %}
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% if group_id != '' and group_title != '' and group_quantity != '' %}
+                                            {% assign group_info = group_id | append: '::' | append: group_title |
+                                            append: '::' | append: group_quantity %}
+                                            {% unless bundle_groups contains group_info %}
+                                            {% assign bundle_groups = bundle_groups | append: group_info | append:
+                                            '||'%}
+                                            {% endunless %}
+                                            {% endif %}
+                                            {% endfor %}
+
                                             {% comment %}
                                             List all bundle groups
                                             {% endcomment %}
